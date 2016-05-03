@@ -9,7 +9,6 @@ import os from 'os';
 
 import download from 'electron-download';
 import unzip from 'unzip';
-import fstream from 'fstream';
 
 import * as BuildUtils from './utils';
 
@@ -31,12 +30,10 @@ async function downloadElectron() {
 
   await new Promise((resolve, reject) => {
     const zipStream = fs.createReadStream(zipPath);
-    const writer = fstream.Writer(targetDir);
 
-    zipStream.pipe(unzip.Parse())
-             .pipe(writer)
-             .on('end', resolve)
-             .on('error', reject);
+    zipStream.pipe(unzip.Extract({ path: targetDir }))
+             .on('error', reject)
+             .on('close', resolve);
   });
 
   // Some tools like electron-rebuild rely on this to find the executable
